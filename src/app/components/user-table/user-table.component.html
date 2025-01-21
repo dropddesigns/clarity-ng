@@ -32,7 +32,7 @@
   <span *ngIf="filterOptions.includes('className')">Filter by class:</span>
 
   <mat-chip-listbox multiple *ngIf="filterOptions.includes('className')">
-    <mat-chip-option *ngFor="let class of ['06A', '04F']"
+    <mat-chip-option *ngFor="let class of ['03C', '04F', '06A']"
       (click)="filterByClass(class)"
       [selected]="selectedClassNames.includes(class)">
       {{ class }}
@@ -70,7 +70,7 @@
 
   <ng-container matColumnDef="class">
     <th mat-header-cell *matHeaderCellDef>Class</th>
-    <td mat-cell *matCellDef="let user">{{ user.className }}</td>
+    <td mat-cell *matCellDef="let user">{{ getUserClassNameForParent(user) }}</td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

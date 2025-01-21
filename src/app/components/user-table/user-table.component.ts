@@ -67,9 +67,19 @@ export class UserTableComponent implements OnInit {
 
     // Filter by class name if selected (updated for multiple classes)
     if (this.selectedClassNames.length > 0) {
-      filteredUsers = filteredUsers.filter(user =>
-        user.className && this.selectedClassNames.includes(user.className) // Added check for className
-      );
+      filteredUsers = filteredUsers.filter(user => {
+        // Check for parent users with multiple children's classes
+        if (user.role === 'parent' && user.children) {
+          // Check if any of the selected class names matches any of the user's children's class names
+          return user.children.some(childId => {
+            const child = this.userDataService.getUsers().find(u => u.id === childId);
+            // Check for exact matches between selected class names and child's class name
+            return child && this.selectedClassNames.some(className => (child.className || '').includes(className));
+          });
+        }
+        // For non-parent users, match directly with the className
+        return user.className && this.selectedClassNames.some(className => (user.className || '').includes(className));
+      });
     }
 
     this.dataSource.data = filteredUsers;
@@ -113,34 +123,39 @@ export class UserTableComponent implements OnInit {
     return user ? user.className : undefined;
   }
 
-  // This method was defined before; no changes needed
-  getSortedChildrenClasses(user: User): string[] {
-    if (user.children && Array.isArray(user.children)) {
+  // Updated method to handle and return children's class names for parents
+  getUserClassNameForParent(user: User): string | string[] {
+    if (user.role === 'parent' && user.children) {
       const classNames = user.children
-        .map(childId => this.getUserClassNameById(childId)) // Get the class names of the children
-        .filter((className): className is string => className != null) // Filter out null or undefined class names
-        .sort((a, b) => {
-          // Split the class names into numeric and alphabetic parts
-          const matchA = a.match(/(\d+)([A-Za-z]+)/);
-          const matchB = b.match(/(\d+)([A-Za-z]+)/);
+        .map(childId => {
+          const child = this.userDataService.getUsers().find(u => u.id === childId);
+          return child ? child.className : undefined;
+        })
+        .filter(className => className != null);
 
-          if (matchA && matchB) {
-            const numA = parseInt(matchA[1], 10); // Numeric part
-            const numB = parseInt(matchB[1], 10); // Numeric part
-            const alphaA = matchA[2]; // Alphabetic part
-            const alphaB = matchB[2]; // Alphabetic part
+      // Sort class names alphabetically
+      classNames.sort((a, b) => {
+        const matchA = a?.match(/(\d+)([A-Za-z]+)/);
+        const matchB = b?.match(/(\d+)([A-Za-z]+)/);
 
-            // First compare numerically, then alphabetically
-            if (numA !== numB) return numA - numB;
-            return alphaA.localeCompare(alphaB);
-          }
+        if (matchA && matchB) {
+          const numA = parseInt(matchA[1], 10);
+          const numB = parseInt(matchB[1], 10);
+          const alphaA = matchA[2];
+          const alphaB = matchB[2];
 
-          return 0; // Fallback case if there's no match (shouldn't happen)
-        });
+          if (numA !== numB) return numA - numB;
+          return alphaA.localeCompare(alphaB);
+        }
+        return 0;
+      });
 
-      return classNames;
+      // Return the sorted class names as a comma-separated string
+      return classNames.join(', ') || 'No Class Assigned';
     }
-    return [];
+
+    // For non-parents, just return the className
+    return user.className || 'No Class Assigned';
   }
 
   // Reset filters for all the selected filters
