@@ -13,7 +13,6 @@ import { UserDataService, User } from '../../services/user-data.service';
   styleUrls: ['./user-table.component.scss'],
   imports: [CommonModule, MatButtonModule, MatChipsModule, MatTableModule]
 })
-
 export class UserTableComponent implements OnInit {
   @Input() role?: string;  // Accepts a comma-separated list of roles
   @Input() yearLevel?: number;
@@ -28,7 +27,7 @@ export class UserTableComponent implements OnInit {
   // Dynamic filters for buttons
   selectedRoles: string[] = [];
   selectedYearLevels: number[] = [];  // Ensure this is an array of numbers
-  selectedClassName?: string;  // Selected class name for filtering
+  selectedClassNames: string[] = [];  // Updated to be an array of strings
 
   constructor(private userDataService: UserDataService, private cdr: ChangeDetectorRef) {}
 
@@ -48,7 +47,7 @@ export class UserTableComponent implements OnInit {
     // Ensure selectedYearLevels is always an array
     this.selectedYearLevels = this.yearLevel !== undefined ? [this.yearLevel] : [];
 
-    this.selectedClassName = this.className;
+    this.selectedClassNames = this.className ? [this.className] : [];  // Updated to handle array for class names
   }
 
   applyFilters(users: User[]): void {
@@ -66,9 +65,11 @@ export class UserTableComponent implements OnInit {
       );
     }
 
-    // Filter by class name if selected
-    if (this.selectedClassName) {
-      filteredUsers = filteredUsers.filter(user => user.className === this.selectedClassName);
+    // Filter by class name if selected (updated for multiple classes)
+    if (this.selectedClassNames.length > 0) {
+      filteredUsers = filteredUsers.filter(user =>
+        user.className && this.selectedClassNames.includes(user.className) // Added check for className
+      );
     }
 
     this.dataSource.data = filteredUsers;
@@ -94,9 +95,15 @@ export class UserTableComponent implements OnInit {
     this.applyFilters(this.userDataService.getUsers());
   }
 
-  // Button-based filtering for class names
+  // Button-based filtering for class names (updated to work with an array)
   filterByClass(className: string): void {
-    this.selectedClassName = this.selectedClassName === className ? undefined : className;
+    if (this.selectedClassNames.includes(className)) {
+      // Remove class from the selected array if it's already there
+      this.selectedClassNames = this.selectedClassNames.filter(c => c !== className);
+    } else {
+      // Add class to the selected array if it's not there
+      this.selectedClassNames.push(className);
+    }
     this.applyFilters(this.userDataService.getUsers());
   }
 
@@ -142,7 +149,7 @@ export class UserTableComponent implements OnInit {
       this.selectedRoles = [];  // Reset role filter
     }
     this.selectedYearLevels = [];  // Reset year level filters
-    this.selectedClassName = undefined;  // Reset class name filter
+    this.selectedClassNames = [];  // Reset class name filter
 
     this.applyFilters(this.userDataService.getUsers());
 
