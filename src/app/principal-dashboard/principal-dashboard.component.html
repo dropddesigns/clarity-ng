@@ -1,0 +1,26 @@
+<div class="border-bottom px-3 py-2">
+  <h2>Clarity Primary School</h2>
+  <p class="ms-1">- Seymour Skinner - <em>Principal</em></p>
+</div>
+
+<div class="px-4 py-3">
+  <h3>School listing</h3>
+
+  <mat-tab-group>
+    <mat-tab label="All">
+      <app-user-table [showFilters]="true" [filterOptions]="['className, role, yearLevel']"></app-user-table>
+    </mat-tab>
+
+    <mat-tab label="Staff">
+      <app-user-table role="principal,teacher" [showFilters]="true" [filterOptions]="['role']"></app-user-table>
+    </mat-tab>
+
+    <mat-tab label="Parents">
+      <app-user-table role="parent" [showFilters]="true" [filterOptions]="['className']"></app-user-table>
+    </mat-tab>
+
+    <mat-tab label="Students">
+      <app-user-table role="student" [showFilters]="true" [filterOptions]="['yearLevel', 'className']"></app-user-table>
+    </mat-tab>
+  </mat-tab-group>
+</div>

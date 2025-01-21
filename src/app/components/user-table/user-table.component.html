@@ -1,0 +1,94 @@
+<!-- SELECTED FILTERS DISPLAY -->
+<div *ngIf="selectedRoles.length || selectedYearLevels.length || selectedClassName">
+  <p><strong>Active Filters:</strong>
+    <span *ngIf="selectedRoles.length">Roles: {{ selectedRoles.join(', ') }}</span>
+    <span *ngIf="selectedYearLevels.length"> | Year Level: {{ selectedYearLevels.join(', ') }}</span>
+    <span *ngIf="selectedClassName"> | Class: {{ selectedClassName }}</span>
+  </p>
+</div>
+
+<!-- FILTER CHIPS -->
+<div *ngIf="showFilters" class="filters">
+  <span *ngIf="filterOptions.includes('role')">Filter by role:</span>
+
+  <mat-chip-listbox multiple *ngIf="filterOptions.includes('role')">
+    <mat-chip-option *ngFor="let role of (role === 'principal,teacher' ? ['principal', 'teacher'] : ['parent', 'principal', 'teacher', 'student'])"
+      (click)="filterByRole(role)"
+      [selected]="selectedRoles.includes(role)">
+      {{ role | titlecase }}
+    </mat-chip-option>
+  </mat-chip-listbox>
+
+  <span *ngIf="filterOptions.includes('yearLevel')">Filter by year level:</span>
+
+  <mat-chip-listbox multiple *ngIf="filterOptions.includes('yearLevel')">
+    <mat-chip-option *ngFor="let year of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+      (click)="filterByYear(year)"
+      [selected]="selectedYearLevels.includes(year)">
+      {{ year }}
+    </mat-chip-option>
+  </mat-chip-listbox>
+
+  <span *ngIf="filterOptions.includes('className')">Filter by class:</span>
+
+  <mat-chip-listbox multiple *ngIf="filterOptions.includes('className')">
+    <mat-chip-option *ngFor="let class of ['06A', '04F']"
+      (click)="filterByClass(class)"
+      [selected]="selectedClassName === class">
+      {{ class }}
+    </mat-chip-option>
+  </mat-chip-listbox>
+
+  <mat-chip *ngIf="selectedRoles.length || selectedYearLevels.length || selectedClassName"
+    (click)="resetFilters()"
+    class="reset-chip">
+    Reset Filters
+  </mat-chip>
+</div>
+
+<!-- TABLE -->
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef>ID</th>
+    <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Name</th>
+    <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="role">
+    <th mat-header-cell *matHeaderCellDef>Role</th>
+    <td mat-cell *matCellDef="let user">{{ user.role | titlecase }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="class">
+    <th mat-header-cell *matHeaderCellDef>Class</th>
+    <td mat-cell *matCellDef="let user">
+      <!-- Logic for displaying class name based on role -->
+      <ng-container *ngIf="user.role === 'parent'">
+        <!-- For parents, list all classes of their children, sorted alphabetically and joined by a comma -->
+        <span *ngFor="let class of getSortedChildrenClasses(user); let last = last">
+          {{ class }}<span *ngIf="!last">, </span>
+        </span>
+      </ng-container>
+      <ng-container *ngIf="user.role === 'teacher' || user.role === 'student'">
+        <!-- For teachers and students, show their own class -->
+        {{ user.className }}
+      </ng-container>
+      <ng-container *ngIf="user.role === 'principal'">
+        <!-- For principals, leave empty cell -->
+        &nbsp;
+      </ng-container>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="email">
+    <th mat-header-cell *matHeaderCellDef> Email </th>
+    <td mat-cell *matCellDef="let user">{{ user.email }} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
