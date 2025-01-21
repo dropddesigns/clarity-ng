@@ -87,35 +87,36 @@ export class UserTableComponent implements OnInit {
 
   // Button-based filtering for roles
   filterByRole(role: string): void {
-    if (this.selectedRoles.includes(role)) {
-      this.selectedRoles = this.selectedRoles.filter(r => r !== role);
-    } else {
-      this.selectedRoles.push(role);
-    }
-    this.applyFilters(this.userDataService.getUsers());
+  if (this.selectedRoles.includes(role)) {
+    this.selectedRoles = this.selectedRoles.filter(r => r !== role);
+  } else {
+    this.selectedRoles = [...this.selectedRoles, role];  // Reassign the array
   }
+  this.applyFilters(this.userDataService.getUsers());
+  this.cdr.detectChanges();  // Trigger change detection
+}
 
   // Button-based filtering for year levels
   filterByYear(yearLevel: number): void {
-    if (this.selectedYearLevels.includes(yearLevel)) {
-      this.selectedYearLevels = this.selectedYearLevels.filter(y => y !== yearLevel);
-    } else {
-      this.selectedYearLevels.push(yearLevel);
-    }
-    this.applyFilters(this.userDataService.getUsers());
+  if (this.selectedYearLevels.includes(yearLevel)) {
+    this.selectedYearLevels = this.selectedYearLevels.filter(y => y !== yearLevel);
+  } else {
+    this.selectedYearLevels = [...this.selectedYearLevels, yearLevel];  // Reassign the array
   }
+  this.applyFilters(this.userDataService.getUsers());
+  this.cdr.detectChanges();  // Trigger change detection
+}
 
   // Button-based filtering for class names (updated to work with an array)
   filterByClass(className: string): void {
-    if (this.selectedClassNames.includes(className)) {
-      // Remove class from the selected array if it's already there
-      this.selectedClassNames = this.selectedClassNames.filter(c => c !== className);
-    } else {
-      // Add class to the selected array if it's not there
-      this.selectedClassNames.push(className);
-    }
-    this.applyFilters(this.userDataService.getUsers());
+  if (this.selectedClassNames.includes(className)) {
+    this.selectedClassNames = this.selectedClassNames.filter(c => c !== className);
+  } else {
+    this.selectedClassNames = [...this.selectedClassNames, className];  // Reassign the array
   }
+  this.applyFilters(this.userDataService.getUsers());
+  this.cdr.detectChanges();  // Trigger change detection
+}
 
   // Helper function to retrieve the class name of a user based on their ID:
   getUserClassNameById(userId: number): string | undefined {
@@ -160,15 +161,16 @@ export class UserTableComponent implements OnInit {
 
   // Reset filters for all the selected filters
   resetFilters(): void {
-    if (!this.role) {
-      this.selectedRoles = [];  // Reset role filter
-    }
-    this.selectedYearLevels = [];  // Reset year level filters
-    this.selectedClassNames = [];  // Reset class name filter
-
-    this.applyFilters(this.userDataService.getUsers());
-
-    // Manually trigger change detection to update the view immediately
-    this.cdr.detectChanges();
+  if (!this.role) {
+    this.selectedRoles = [];  // Reset role filter
   }
+  this.selectedYearLevels = [];  // Reset year level filters
+  this.selectedClassNames = [];  // Reset class name filter
+
+  this.applyFilters(this.userDataService.getUsers());
+
+  // Trigger change detection to reflect the reset immediately
+  this.cdr.detectChanges();
+}
+
 }
